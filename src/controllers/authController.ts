@@ -2,12 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import { AuthService } from "@/services/authService";
 import { RegisterInput, LoginInput, RefreshTokenInput } from "@/types/auth";
 import { AuthenticatedRequest } from "@/middlewares/authMiddleware";
+import { CronService } from "@/services/cronService";
 
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
       const data: RegisterInput = req.body;
       const result = await AuthService.register(data);
+
+      // Enviar e-mail de boas-vindas (não bloquear a resposta)
+      CronService.sendWelcomeEmail(result.user).catch(console.error);
 
       res.status(201).json({
         success: true,

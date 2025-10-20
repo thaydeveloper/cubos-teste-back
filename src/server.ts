@@ -10,6 +10,9 @@ import { notFoundHandler } from "@/middlewares/notFoundHandler";
 import authRoutes from "@/routes/authRoutes";
 import movieRoutes from "@/routes/movieRoutes";
 import uploadRoutes from "@/routes/uploadRoutes";
+import emailRoutes from "@/routes/emailRoutes";
+import { EmailService } from "@/config/email";
+import { CronService } from "@/services/cronService";
 
 dotenv.config();
 
@@ -45,6 +48,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/email", emailRoutes);
 
 app.get("/api", (req, res) => {
   res.json({
@@ -54,16 +58,38 @@ app.get("/api", (req, res) => {
       auth: "/api/auth",
       movies: "/api/movies",
       upload: "/api/upload",
+      email: "/api/email",
     },
+    features: [
+      "JWT Authentication",
+      "CRUD de Filmes com filtros",
+      "Upload para AWS S3",
+      "Sistema de E-mails",
+      "Lembretes de lançamento",
+      "Agendamento automático",
+    ],
   });
 });
 
 app.use(notFoundHandler);
 app.use(errorHandler);
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+
+// Inicializar serviços
+async function initializeServices() {
+  try {
+    await EmailService.initialize();
+    await CronService.initialize();
+  } catch (error) {
+    console.error("Erro ao inicializar serviços:", error);
+  }
+}
+
+app.listen(PORT, async () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+
+  // Inicializar serviços após o servidor estar rodando
+  await initializeServices();
 });
 
 export default app;

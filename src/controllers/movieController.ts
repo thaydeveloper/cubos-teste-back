@@ -6,6 +6,8 @@ import {
   MovieFilters,
 } from "@/types/movie";
 import { AuthenticatedRequest } from "@/middlewares/authMiddleware";
+import { CronService } from "@/services/cronService";
+import { prisma } from "@/config/database";
 
 export class MovieController {
   static async create(
@@ -16,6 +18,18 @@ export class MovieController {
     try {
       const data: CreateMovieInput = req.body;
       const result = await MovieService.create(data, req.userId!);
+
+      // Buscar dados do usuário para o e-mail
+      const user = await prisma.user.findUnique({
+        where: { id: req.userId! },
+      });
+
+      if (user) {
+        // Enviar notificação de filme adicionado (não bloquear a resposta)
+        CronService.sendMovieAddedNotification(result, user).catch(
+          console.error
+        );
+      }
 
       res.status(201).json({
         success: true,
