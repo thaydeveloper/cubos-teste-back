@@ -9,6 +9,7 @@ import { errorHandler } from "@/middlewares/errorHandler";
 import { notFoundHandler } from "@/middlewares/notFoundHandler";
 import authRoutes from "@/routes/authRoutes";
 import movieRoutes from "@/routes/movieRoutes";
+import uploadRoutes from "@/routes/uploadRoutes";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.get("/api", (req, res) => {
   res.json({
