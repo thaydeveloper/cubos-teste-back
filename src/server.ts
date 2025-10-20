@@ -7,6 +7,7 @@ import rateLimit from "express-rate-limit";
 
 import { errorHandler } from "@/middlewares/errorHandler";
 import { notFoundHandler } from "@/middlewares/notFoundHandler";
+import authRoutes from "@/routes/authRoutes";
 
 dotenv.config();
 
@@ -38,6 +39,8 @@ app.get("/health", (req, res) => {
     environment: process.env.NODE_ENV || "development",
   });
 });
+
+app.use("/api/auth", authRoutes);
 
 app.get("/api", (req, res) => {
   res.json({
