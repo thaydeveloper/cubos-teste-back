@@ -10,13 +10,15 @@ export const createMovieSchema = z.object({
     .number()
     .int()
     .min(1, "Duração deve ser maior que 0")
-    .max(600, "Duração máxima: 600 minutos"),
+    .max(1200, "Duração máxima: 1200 minutos (20 horas)"),
   releaseDate: z.string().datetime("Data de lançamento inválida"),
   genre: z.string().optional(),
   director: z.string().optional(),
   cast: z.array(z.string()).default([]),
   rating: z.number().min(0).max(10).optional(),
   imageUrl: z.string().url().optional(),
+  tagline: z.string().optional(), // Frase de efeito
+  trailerUrl: z.string().url().optional(), // URL do trailer
 });
 
 export const updateMovieSchema = createMovieSchema.partial();

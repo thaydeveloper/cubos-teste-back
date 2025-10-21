@@ -24,19 +24,30 @@ export class MovieRepository {
   static async create(
     data: CreateMovieInput & { userId: string }
   ): Promise<any> {
-    return prisma.movie.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        duration: data.duration,
-        releaseDate: new Date(data.releaseDate),
-        imageUrl: data.imageUrl,
-        genre: data.genre,
-        director: data.director,
-        cast: data.cast,
-        rating: data.rating,
-        userId: data.userId,
-      },
+    console.log('📝 MovieRepository.create - Dados recebidos:', {
+      ...data,
+      userId: data.userId
+    });
+
+    const movieData: any = {
+      title: data.title,
+      description: data.description,
+      duration: data.duration,
+      releaseDate: new Date(data.releaseDate),
+      imageUrl: data.imageUrl,
+      genre: data.genre,
+      director: data.director,
+      cast: data.cast,
+      rating: data.rating,
+      tagline: data.tagline, // Frase de efeito
+      trailerUrl: data.trailerUrl, // URL do trailer
+      userId: data.userId,
+    };
+
+    console.log('📋 MovieRepository.create - movieData preparado:', movieData);
+
+    const movie = await prisma.movie.create({
+      data: movieData,
       include: {
         user: {
           select: {
@@ -46,6 +57,8 @@ export class MovieRepository {
         },
       },
     });
+
+    return movie;
   }
 
   static async update(id: string, data: UpdateMovieInput): Promise<any> {
@@ -62,6 +75,8 @@ export class MovieRepository {
     if (data.director !== undefined) updateData.director = data.director;
     if (data.cast !== undefined) updateData.cast = data.cast;
     if (data.rating !== undefined) updateData.rating = data.rating;
+    if (data.tagline !== undefined) updateData.tagline = data.tagline;
+    if (data.trailerUrl !== undefined) updateData.trailerUrl = data.trailerUrl;
 
     return prisma.movie.update({
       where: { id },
@@ -188,6 +203,8 @@ export class MovieRepository {
       director: movie.director,
       cast: movie.cast,
       rating: movie.rating,
+      tagline: movie.tagline, // Frase de efeito
+      trailerUrl: movie.trailerUrl, // URL do trailer
       createdAt: movie.createdAt,
       updatedAt: movie.updatedAt,
       userId: movie.userId,

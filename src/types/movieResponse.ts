@@ -9,6 +9,8 @@ export interface MoviePublic {
   director?: string;
   cast: string[];
   rating?: number;
+  tagline?: string; // Frase de efeito
+  trailerUrl?: string; // URL do trailer (YouTube)
   createdAt: Date;
   updatedAt: Date;
   userId: string;

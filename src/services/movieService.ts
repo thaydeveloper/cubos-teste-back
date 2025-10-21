@@ -30,13 +30,28 @@ export class MovieService {
     data: UpdateMovieInput,
     userId: string
   ): Promise<MoviePublic> {
+    console.log('🔍 MovieService.update - Verificando permissões:', {
+      movieId: id,
+      userIdFromToken: userId,
+      userIdType: typeof userId
+    });
+
     const movie = await MovieRepository.findById(id);
     if (!movie) {
       throw new AppError("Filme não encontrado", 404);
     }
 
+    console.log('🎬 MovieService.update - Filme encontrado:', {
+      movieUserId: movie.userId,
+      movieUserIdType: typeof movie.userId,
+      tokenUserId: userId,
+      tokenUserIdType: typeof userId,
+      isEqual: movie.userId === userId,
+      movieTitle: movie.title
+    });
+
     if (movie.userId !== userId) {
-      throw new AppError("Você não tem permissão para editar este filme", 403);
+      throw new AppError("Acesso negado: Apenas o criador do filme pode editá-lo. Este filme foi criado por outro usuário.", 403);
     }
 
     const updatedMovie = await MovieRepository.update(id, data);
@@ -50,7 +65,7 @@ export class MovieService {
     }
 
     if (movie.userId !== userId) {
-      throw new AppError("Você não tem permissão para excluir este filme", 403);
+      throw new AppError("Acesso negado: Apenas o criador do filme pode excluí-lo. Este filme foi criado por outro usuário.", 403);
     }
 
     await MovieRepository.delete(id);

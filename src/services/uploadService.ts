@@ -23,15 +23,27 @@ export class UploadService {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
+      CacheControl: "max-age=31536000", // Cache de 1 ano
     });
 
     try {
+      console.log("🔄 Enviando para S3:", { bucket: S3_BUCKET, key: fileName });
       await s3Client.send(command);
 
       const imageUrl = `https://${S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+      console.log("✅ Imagem enviada para S3:", imageUrl);
       return imageUrl;
-    } catch (error) {
-      console.error("S3 Upload Error:", error);
+    } catch (error: any) {
+      console.error("❌ S3 Upload Error detalhado:", {
+        error: error?.message || error,
+        code: error?.Code,
+        statusCode: error?.$metadata?.httpStatusCode,
+        bucket: S3_BUCKET,
+        region: process.env.AWS_REGION,
+        hasCredentials: !!(
+          process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+        ),
+      });
       throw new AppError("Erro no upload da imagem", 500);
     }
   }

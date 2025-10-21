@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
+import swaggerUi from "swagger-ui-express";
 
 import { errorHandler } from "@/middlewares/errorHandler";
 import { notFoundHandler } from "@/middlewares/notFoundHandler";
@@ -13,11 +14,15 @@ import uploadRoutes from "@/routes/uploadRoutes";
 import emailRoutes from "@/routes/emailRoutes";
 import { EmailService } from "@/config/email";
 import { CronService } from "@/services/cronService";
+import { swaggerSpec } from "@/config/swagger";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configurar trust proxy para ngrok e outros proxies
+app.set("trust proxy", 1);
 
 app.use(helmet());
 
@@ -27,12 +32,31 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
+
+// Configuração de CORS completamente aberta
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3001",
-    credentials: true,
+    origin: "*", // Permitir TODAS as origens
+    credentials: false, // Desabilitar credentials para permitir origin *
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["*"], // Permitir todos os headers
+    exposedHeaders: ["X-Total-Count"],
+    optionsSuccessStatus: 200,
   })
 );
+
+// Middleware adicional para CORS - completamente aberto
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Expose-Headers", "X-Total-Count");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -44,6 +68,16 @@ app.get("/health", (req, res) => {
     environment: process.env.NODE_ENV || "development",
   });
 });
+
+// Documentação Swagger
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Movies API Documentation",
+  })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
@@ -59,6 +93,7 @@ app.get("/api", (req, res) => {
       movies: "/api/movies",
       upload: "/api/upload",
       email: "/api/email",
+      docs: "/api/docs",
     },
     features: [
       "JWT Authentication",

@@ -16,6 +16,9 @@ export class MovieController {
     next: NextFunction
   ) {
     try {
+      console.log('🎬 MovieController.create - userId do req:', req.userId);
+      console.log('🎬 MovieController.create - body:', req.body);
+      
       const data: CreateMovieInput = req.body;
       const result = await MovieService.create(data, req.userId!);
 
@@ -61,6 +64,13 @@ export class MovieController {
     next: NextFunction
   ) {
     try {
+      console.log('🔧 MovieController.update - Dados recebidos:', {
+        movieId: req.params.id,
+        userId: req.userId,
+        userIdType: typeof req.userId,
+        body: req.body
+      });
+
       const { id } = req.params;
       const data: UpdateMovieInput = req.body;
       const result = await MovieService.update(id, data, req.userId!);
