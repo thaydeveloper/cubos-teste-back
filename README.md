@@ -1,75 +1,35 @@
-# Movies API Backend
+# 🎬 Movies API Backend
 
-Backend API RESTful para gerenciamento de filmes e usuários.
+API RESTful para gerenciamento de filmes com autenticação JWT, upload de imagens (AWS S3), integração TMDB e notificações por e-mail.
 
-## 🚀 Tecnologias
+## 🚀 Instalação Rápida
 
-- **TypeScript** - Linguagem principal
-- **Express.js** - Framework web
-- **Prisma** - ORM para PostgreSQL
-- **PostgreSQL** - Banco de dados
-- **JWT** - Autenticação e autorização
-- **AWS S3** - Armazenamento de imagens
-- **Nodemailer** - Envio de e-mails
-- **Zod** - Validação de dados
-- **Jest** - Testes
+```bash
+git clone <repository-url>
+cd teste-cubos-back
+npm install
+cp .env.example .env # Configure suas variáveis
+npm run db:migrate && npm run db:generate # Banco de dados
+npm run dev # Inicia servidor
+```
 
-## 📋 Pré-requisitos
+## 🔑 Principais Endpoints
 
-- Node.js (v18+)
+- POST /api/auth/register — Cadastro
+- POST /api/auth/login — Login (JWT)
+- GET /api/movies — Lista filmes (filtros/paginação)
+- POST /api/movies — Criar filme (auth)
+- POST /api/upload/image — Upload imagem (auth)
+- POST /api/email/test — Teste e-mail
+- GET /api/docs — Swagger
+
+## 🛠️ Configuração
+
+- Node.js v18+
 - PostgreSQL
-- npm ou yarn
-
-## 🔧 Configuração
-
-1. **Clone o repositório**
-
-   ```bash
-   git clone <repository-url>
-   cd teste-cubos-back
-   ```
-
-2. **Instale as dependências**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure as variáveis de ambiente**
-
-   ```bash
-   cp .env.example .env
-   # Edite o arquivo .env com suas configurações
-   ```
-
-4. **Inicie os serviços com Docker**
-
-   ```bash
-   docker-compose up -d
-   ```
-
-5. **Configure o banco de dados**
-
-   ```bash
-   npm run db:migrate
-   npm run db:generate
-   ```
-
-6. **Inicie o servidor de desenvolvimento**
-   ```bash
-   npm run dev
-   ```
-
-## 📚 Scripts Disponíveis
-
-- `npm run dev` - Inicia o servidor em modo desenvolvimento
-- `npm run build` - Compila o projeto para produção
-- `npm run start` - Inicia o servidor compilado
-- `npm run db:migrate` - Executa migrações do banco
-- `npm run db:generate` - Gera o cliente Prisma
-- `npm run db:studio` - Abre o Prisma Studio
-- `npm test` - Executa os testes
-- `npm run test:watch` - Executa testes em modo watch
+- AWS S3 (credenciais no .env)
+- TMDB API Key
+- Email (Ethereal para dev)
 
 ## 🗄️ Estrutura do Projeto
 
@@ -86,51 +46,45 @@ src/
 └── server.ts        # Arquivo principal
 ```
 
-## 📋 Endpoints da API
-
-### Autenticação
-
-- `POST /api/auth/register` - Cadastro de usuário
-- `POST /api/auth/login` - Login
-- `GET /api/auth/me` - Dados do usuário logado
-
-### Filmes
-
-- `GET /api/movies` - Lista paginada de filmes
-- `GET /api/movies/:id` - Detalhes do filme
-- `POST /api/movies` - Criar filme
-- `PUT /api/movies/:id` - Editar filme
-- `DELETE /api/movies/:id` - Excluir filme
-
-### Upload
-
-- `POST /api/upload` - Upload de imagem
-
 ## 🏗️ Arquitetura
 
-O projeto segue os princípios de Clean Architecture e SOLID:
+O projeto segue Clean Architecture e princípios SOLID:
 
-- **Controllers**: Responsáveis por receber requisições e retornar respostas
-- **Services**: Contêm a lógica de negócio
-- **Repositories**: Abstraem o acesso aos dados
-- **Middlewares**: Processam requisições (autenticação, validação, etc.)
+```
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ Controllers  │ -> │  Services     │ -> │ Repositories  │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                   │                   │
+        v                   v                   v
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ Middlewares   │    │ Utilities     │    │ Database      │
+└───────────────┘    └───────────────┘    └───────────────┘
+```
 
-## 🔒 Segurança
-
-- Autenticação JWT com refresh tokens
-- Rate limiting
-- Helmet para headers de segurança
-- Validação de dados com Zod
-- CORS configurado
-
-## 🧪 Testes
+## 📚 Exemplos Rápidos
 
 ```bash
-npm test              # Executa todos os testes
-npm run test:watch    # Modo watch
-npm run test:coverage # Cobertura de testes
+# Registrar usuário
+curl -X POST http://localhost:3000/api/auth/register -H "Content-Type: application/json" -d '{"name":"João","email":"joao@teste.com","password":"123456"}'
+
+# Login
+curl -X POST http://localhost:3000/api/auth/login -H "Content-Type: application/json" -d '{"email":"joao@teste.com","password":"123456"}'
+
+# Listar filmes
+curl http://localhost:3000/api/movies?page=1&limit=5
 ```
+
+## 🩺 Problemas Comuns
+
+- Banco: Verifique se PostgreSQL está rodando
+- JWT: Confira variáveis no .env
+- S3: Cheque credenciais AWS
+- E-mail: Veja logs para Preview URL
+
+## 📖 Documentação
+
+Swagger: http://localhost:3000/api/docs
 
 ## 📝 Licença
 
-ISC
+ISC - Projeto para aprendizado.
